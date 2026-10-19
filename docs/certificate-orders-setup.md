@@ -1,28 +1,43 @@
-# HAM — Certificate request staging
+# HAM PLUS — Supabase certificate request rollout
 
-This work is in a separate branch and is **not deployed**.
+This code is in **draft PR #1**, not in `main`, and it has NOT been deployed to Render.
 
-## Routes
-- Visitor: `/certificates`
-- Administrator: `/certificates-admin` (uses the existing administrator password)
-- API: `/api/certificates/orders` and authenticated `/api/admin/certificates/orders`
+## 1. Prepare the dedicated Supabase database
 
-## What is implemented
-The customer expressly consents, enters a name/device label, creates a token-protected order and submits a **manually supplied** UDID. Admins can list orders and change their status. Manual identifiers are marked `manual-unverified`. The design deliberately does **not** install a device management profile or issue Apple certificates.
+Supabase dashboard → project **ham-plus** → SQL Editor → create a new query.
+Run `supabase/migrations/20261019_certificate_orders.sql` once (or use the connected Supabase management app).
+The migration creates `public.ham_certificate_orders`, enables RLS, revokes all access from `anon` and `authenticated`, and grants the server's `service_role` access.
+Never create permissive public SELECT/INSERT/UPDATE policies for this table.
 
-## Before enabling customer intake
-1. Run `npm test` and verify the workflow tests pass.
-2. Attach a persistent, access-controlled storage disk or replace file storage with a suitable database. Render's ephemeral filesystem is NOT sufficient.
-3. Set `DATA_DIR` to the durable storage path and verify it across restart/deploy.
-4. Only after storage and backups are tested, set both `HAM_CERT_STORAGE_READY=true` and `HAM_CERT_ORDERS_ENABLED=true` in Render's environment configuration (never in GitHub).
-5. Add a real privacy notice, explicit retention/deletion procedure, administrator deletion controls and customer support details before commercial use.
-6. Test the workflow on an iPhone and iPad, and verify the supplier's terms and Apple's distribution rules.
+## 2. Server-side environment variables (Render only)
 
-## Known limitations
-- **Automatic Apple Profile Service/UDID collection is NOT implemented or tested.** The order form supports manual UDID submission only.
-- The API's deletion handler is not connected to the existing server router yet; do not describe deletion as available in the admin dashboard.
-- Orders and login sessions are not suitable for horizontal scale without shared infrastructure.
-- A device UDID does not itself authorize public distribution, sell Apple certificates, or guarantee an app won't be revoked.
-- Nothing should be merged to `main` until approval and security checks are complete.
+After verifying table creation and approving the code:
+- `SUPABASE_URL`: the **public Supabase project URL** from Supabase Dashboard.
+- `SUPABASE_SECRET_KEY`: the **new** `sb_secret_...` key from Supabase Dashboard → Settings → API Keys, stored only in Render's environment. Never add it to GitHub or browser JavaScript.
+- Alternatively, legacy `SUPABASE_SERVICE_ROLE_KEY` is supported but deprecated. Prefer `SUPABASE_SECRET_KEY`.
+- `HAM_CERT_STORAGE_READY=true`: enable only after confirming credentials and persistent database operations work.
+- `HAM_CERT_ORDERS_ENABLED=true`: enable customer intake only after all security/privacy/device tests and final approval. Intake remains disabled by default.
 
-No private keys, customer UDIDs, Apple IDs or passwords should be committed.
+The secret API key should be sent solely using the Supabase `apikey` request header; the legacy service-role JWT also uses `Authorization: Bearer`.
+
+## 3. New staging routes
+
+- `/certificates`: customer consent, create order and manually submit a UDID.
+- `/certificates-admin`: login with existing HAM admin password, view orders, update statuses and delete customer data.
+- Orders are stored in Supabase, **not on Render's ephemeral filesystem**.
+- Browser visitors never receive the Supabase secret key.
+- Customer order access requires an unguessable token whose SHA-256 hash is stored in the database.
+
+## 4. Checks required before production
+
+1. Confirm migrations are applied and RLS/grants work (anon should not see orders).
+2. Run CI Node tests and manually test the pages with a staging server.
+3. Verify admin login survives Render restarts. The existing HAM `auth.json` password store and sessions live locally/in memory; the Free instance can lose or reset them. Secure durable auth is needed before commercial use.
+4. Configure a retention policy and deletion workflow, customer support contact and transparent privacy policy. Check rate limits and abuse controls.
+5. Verify modern iOS device ID collection method on real devices. **Automatic Apple profile-based UDID extraction is not implemented.** Manual customer-submitted UDID is labeled unverified.
+6. Do not sell Apple certificates or promise that sideloaded applications cannot be revoked without verifying Apple distribution policies and your supplier's actual authorization.
+7. Leave the Render deployment on `main`. Do not merge this draft PR until an explicit go-ahead.
+
+## Security boundaries
+
+Never disclose, screenshot, or commit signing certificate private keys, `.p12` passwords, Apple credentials, Supabase secret keys, or Render deployment hooks. Never put the server secret key in the public HTML.
