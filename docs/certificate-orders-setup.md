@@ -27,6 +27,16 @@ The secret API key should be sent solely using the Supabase `apikey` request hea
 - Browser visitors never receive the Supabase secret key.
 - Customer order access requires an unguessable token whose SHA-256 hash is stored in the database.
 
+## Protected connection check
+
+After setting Render environment variables, sign in to the HAM administrator panel.
+Request `GET /api/admin/certificates/status` on the same origin, using the administrator's authenticated session.
+A response with `connected: true` confirms a read-only connection to Supabase.
+A response with `ordersEnabled: false` is expected while customer intake is disabled.
+Never include API keys in these requests or browser source.
+
+**Caution:** Changing Render environment settings may trigger a redeploy and restart of the live `main` service. The existing administrator password and session management currently use ephemeral local/in-memory state; arrange durable authentication before any production restart and do not change live settings until approved.
+
 ## 4. Checks required before production
 
 1. Confirm migrations are applied and RLS/grants work (anon should not see orders).
