@@ -4,8 +4,7 @@ This code is in **draft PR #1**, not in `main`, and it has NOT been deployed to 
 
 ## 1. Prepare the dedicated Supabase database
 
-Supabase dashboard → project **ham-plus** → SQL Editor → create a new query.
-Run `supabase/migrations/20261019_certificate_orders.sql` once (or use the connected Supabase management app).
+**Completed on 2026-10-19:** the database migration `create_private_ham_certificate_orders` has already been applied to Supabase project `ham-plus` (`kwphjsvdsaorfkojxwar`). Do not re-run it manually. The security hardening migration `restrict_rls_auto_enable_function_execution` was also applied.
 The migration creates `public.ham_certificate_orders`, enables RLS, revokes all access from `anon` and `authenticated`, and grants the server's `service_role` access.
 Never create permissive public SELECT/INSERT/UPDATE policies for this table.
 
