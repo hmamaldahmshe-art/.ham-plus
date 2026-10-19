@@ -24,7 +24,7 @@ function configProfile(order,challenge,origin){
     '</dict></dict></plist>';
   return body;
 }
-function parseDeviceResponse(bytes,expectedChallenge){
+function parseDeviceResponse(bytes,expectedChallengeHash){
   if(!Buffer.isBuffer(bytes)||bytes.length<100||bytes.length>100000)throw Error('CMS body size invalid');
   const output=spawnSync('openssl',['cms','-verify','-inform','DER','-noverify'],{
     input:bytes,timeout:7000,maxBuffer:60000,windowsHide:true
@@ -39,8 +39,9 @@ function parseDeviceResponse(bytes,expectedChallenge){
     return values.length===1?values[0]:null;
   };
   const challenge=attribute('CHALLENGE');
-  if(typeof challenge!=='string'||challenge.length!==expectedChallenge.length||
-    !crypto.timingSafeEqual(Buffer.from(challenge),Buffer.from(expectedChallenge)))
+  const receivedHash=typeof challenge==='string'?crypto.createHash('sha256').update(challenge).digest('hex'):'';
+  if(typeof challenge!=='string'||receivedHash.length!==expectedChallengeHash.length||
+    !crypto.timingSafeEqual(Buffer.from(receivedHash),Buffer.from(expectedChallengeHash)))
     throw Error('Challenge not verified');
   const udid=attribute('UDID')?.toUpperCase();
   if(!udid||!/^(?:[0-9A-F]{40}|[0-9A-F]{8}-[0-9A-F]{16})$/.test(udid))
