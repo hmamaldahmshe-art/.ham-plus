@@ -119,7 +119,7 @@ function build({getSession,store}){
     }
     if(personal){
       const record=await db.get(personal[1]);
-      if(!record||!owner(req,record))return fail(res,404,'الطلب غير موجود');
+      if(!record||(personal[2]!=='profile.mobileconfig'&&!owner(req,record)))return fail(res,404,'الطلب غير موجود');
       if(method==='GET'&&!personal[2])
         return response(res,200,{id:record.id,status:record.status,
           deviceName:record.deviceName,udidReceived:!!record.udid,productCode:record.productCode||null,iosBuild:record.iosBuild||null,source:record.source||null});
