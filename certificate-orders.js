@@ -35,6 +35,16 @@ function build({getSession,store}){
   const admin=pathname.match(new RegExp('^/api/admin/certificates/orders(?:/('+uuid+'))?$'));
   const deleteRoute=pathname.match(new RegExp('^/api/admin/certificates/orders/('+uuid+')/delete$'));
   const personal=pathname.match(new RegExp('^/api/certificates/orders/('+uuid+')(?:/(udid))?$'));
+  if(pathname==='/api/admin/certificates/status'&&method==='GET'){
+    if(!getSession(req))return fail(res,401,'يلزم تسجيل دخول المدير');
+    if(!db)return fail(res,503,'قاعدة بيانات الطلبات غير مرتبطة بعد');
+    try{
+      await db.health();
+      return response(res,200,{connected:true,ordersEnabled:process.env.HAM_CERT_ORDERS_ENABLED==='true'});
+    }catch{
+      return fail(res,503,'تعذر الاتصال بقاعدة بيانات الطلبات');
+    }
+  }
   if(!db)return fail(res,503,'قاعدة بيانات الطلبات غير مرتبطة بعد');
   try{
     if(method==='POST'&&pathname==='/api/certificates/orders'){
