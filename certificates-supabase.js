@@ -9,11 +9,11 @@ function config(){
   if(base.protocol!=='https:'||!base.hostname.endsWith('.supabase.co')||base.pathname!=='/'||!key)return null;
   return {base,key};
 }
-const fields='id,customer_name,device_name,token_hash,status,udid,source,consent_at,created_at,updated_at';
+const fields='id,customer_name,device_name,token_hash,status,udid,source,product_code,ios_build,consent_at,created_at,updated_at';
 function normalize(x){
   if(!x)return null;
   return {id:x.id,name:x.customer_name,deviceName:x.device_name,tokenHash:x.token_hash,
-    status:x.status,udid:x.udid,source:x.source,consentAt:x.consent_at,
+    status:x.status,udid:x.udid,source:x.source,productCode:x.product_code,iosBuild:x.ios_build,consentAt:x.consent_at,
     createdAt:x.created_at,updatedAt:x.updated_at};
 }
 function buildStore({transport=fetch}={}){
@@ -60,6 +60,9 @@ function buildStore({transport=fetch}={}){
       if(Object.hasOwn(patch,'status'))values.status=patch.status;
       if(Object.hasOwn(patch,'udid'))values.udid=patch.udid;
       if(Object.hasOwn(patch,'source'))values.source=patch.source;
+      if(Object.hasOwn(patch,'productCode'))values.product_code=patch.productCode;
+      if(Object.hasOwn(patch,'iosBuild'))values.ios_build=patch.iosBuild;
+      if(Object.hasOwn(patch,'deviceName'))values.device_name=patch.deviceName;
       const rows=await call('id=eq.'+encodeURIComponent(id)+'&select='+fields,
         {method:'PATCH',body:values});
       return normalize(rows[0]);
