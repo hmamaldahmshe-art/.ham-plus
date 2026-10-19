@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>هام | التعرف على جهاز iPhone</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0c1110;color:#f4f8f1;font:16px system-ui,-apple-system,sans-serif}
+main{max-width:660px;margin:0 auto;padding:24px 16px 70px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+.logo{font-size:25px;font-weight:900;color:#d5ffb5}a{color:#b8f46a}h1{font-size:30px;margin:12px 0 10px}h2{font-size:22px;margin-top:0}
+p,li{color:#c5d1c7;line-height:1.8}.card{padding:24px 22px;margin:18px 0;border:1px solid #344838;border-radius:18px;background:#19241d}
+button,.action{display:block;width:100%;margin:16px 0 0;padding:14px 18px;text-align:center;background:#b8f46a;border:0;border-radius:11px;color:#17310a;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}
+button:disabled{opacity:.5}.secondary{background:#304a37;color:#edf8ed}.consent{display:flex;align-items:flex-start;gap:12px;background:#0e1b14;padding:14px;border-radius:12px;line-height:1.8}
+input[type=checkbox]{margin-top:7px;accent-color:#b8f46a}input[type=text]{display:block;background:#0d1711;color:white;border:1px solid #647768;border-radius:10px;padding:13px;width:100%;font:inherit;direction:ltr;text-align:left}
+.hide{display:none}.note{margin:16px 0;padding:14px;background:#102117;border-radius:12px;line-height:1.7;overflow-wrap:anywhere}.notice{color:#cceacb}.warning{border-right:3px solid #d5b777;padding-right:12px;color:#e9d7a2}
+.steps{margin:10px 0;padding:0 23px}small{color:#aeb8b0;line-height:1.7}.result{padding:13px;border-radius:10px;background:#0e1a13;margin-top:12px;overflow-wrap:anywhere}
+details{margin:16px 0;background:#152119;padding:14px;border-radius:10px}summary{cursor:pointer;color:#d3e5d1}strong{color:#f6fff1}
+</style></head><body><main>
+<header class="top"><span class="logo">هـ HAM</span><a href="/">العودة للرئيسية</a></header>
+<h1>تسجيل جهازك تلقائيًا</h1>
+<p>النسخة التجريبية من هام للآيفون. بعد موافقتك وتثبيت ملف تعريف مؤقت، يحاول الجهاز إرسال <strong>UDID ورمز الطراز ورقم إصدار النظام</strong> مباشرة إلى طلبك، بدون كتابتها يدويًا.</p>
+<section class="card" id="newOrder">
+<h2>تجربة التعرف على الجهاز</h2>
+<p>لا يمكن لأي موقع معرفة UDID بمجرد فتح الصفحة. يلزم تنزيل ملف تعريف Apple والموافقة عليه يدويًا من الإعدادات. هذه تجربة تقنية، وليست شهادة توقيع.</p>
+<label class="consent"><input type="checkbox" id="consent"><span>أوافق على طلب معرّف UDID ورمز طراز الجهاز ورقم إصدار النظام وحفظها في قاعدة بيانات هام التجريبية. لا أُدخل كلمة مرور Apple ID ولا أسمح بإدارة جهازي.</span></label>
+<button id="start">ابدأ التجربة على الآيفون</button>
+<div id="error" class="note hide" role="alert"></div>
+</section>
+<section class="card hide" id="progress">
+<h2>طلبك التجريبي جاهز</h2><p>الآن حمّل ملف التعريف من <strong>Safari على نفس الآيفون</strong> الذي ترغب في تسجيله.</p>
+<a class="action" id="profileLink" href="#">تحميل ملف تعريف HAM التجريبي</a>
+<p class="warning">ملف التعريف تجريبي وغير موقّع بهوية هام؛ قد يظهر تحذير «غير موقّع» أو يرفضه iOS. لا تكمل التثبيت إذا ظهرت له صلاحيات إدارة جهاز أو إعدادات غير متوقعة.</p>
+<ol class="steps">
+<li>اضغط «تحميل ملف تعريف HAM التجريبي» ووافق على تنزيل الملف.</li>
+<li>افتح <strong>الإعدادات ← تم تنزيل ملف تعريف</strong> أو <strong>عام ← VPN وإدارة الجهاز</strong>.</li>
+<li>راجع اسم الملف ووصفه ثم ثبّته بموافقتك. قد يطلب رمز قفل الآيفون المحلي.</li>
+<li>ارجع إلى Safari لهذه الصفحة واضغط «التحقق من البيانات».</li>
+</ol>
+<div id="state" class="result" role="status">بانتظار استجابة الآيفون. لم يصل UDID بعد.</div>
+<button class="secondary" id="check">التحقق من البيانات</button>
+<details><summary>خيار احتياطي: إرسال UDID يدويًا</summary><p>إذا لم يقبل iOS آلية الملف القديمة، تستطيع تقديم UDID يدويًا للتجربة. يُسجّل كمعرّف غير موثق.</p>
+<label for="manual">UDID</label><input id="manual" type="text" autocapitalize="characters" spellcheck="false">
+<button class="secondary" id="sendManual">إرسال UDID يدويًا</button></details>
+</section>
+<p><small>المعلومات المستلمة من ملف التعريف تعتبر أولية حتى نتحقق من شهادة توقيع الجهاز وسلسلة الثقة الخاصة بـApple. لا نجمع الرقم التسلسلي أو IMEI، ولا يصدر الموقع شهادات Apple. جرّب على جهاز تملكه، واحذف ملف التعريف بعد انتهاء الاختبار إن بقي مثبتًا.</small></p>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);let order=null;
+async function request(path,opts={}){
+ const r=await fetch(path,{credentials:'same-origin',cache:'no-store',...opts});
+ const data=await r.json().catch(()=>({error:'لم تصل استجابة مفهومة من الخادم'}));
+ if(!r.ok)throw Error(data.error||'تعذر إكمال العملية');
+ return data;
+}
+function setProgress(){if(!order)return;
+ $('newOrder').classList.add('hide');$('progress').classList.remove('hide');
+ $('profileLink').href='/api/certificates/orders/'+order.id+'/profile.mobileconfig';
+}
+try{const old=JSON.parse(sessionStorage.getItem('ham_current_trial')||'null');
+ if(old&&typeof old.id==='string'&&typeof old.token==='string') {order=old;setProgress();}
+}catch{}
+$('start').addEventListener('click',async()=>{
+ if(!$('consent').checked){$('error').textContent='يجب أن توافق أولًا على مشاركة بيانات جهازك.';$('error').classList.remove('hide');return;}
+ $('start').disabled=true;$('error').classList.add('hide');
+ try{order=await request('/api/certificates/orders',{method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({consent:true})});
+  sessionStorage.setItem('ham_current_trial',JSON.stringify({id:order.id,token:order.token}));
+  setProgress();
+ }catch(e){$('error').textContent=e.message;$('error').classList.remove('hide')}
+ finally{$('start').disabled=false;}
+});
+async function check(){
+ if(!order)return;
+ try{
+ const r=await request('/api/certificates/orders/'+order.id,{headers:{Authorization:'Bearer '+order.token}});
+ if(r.udidReceived){
+  $('state').textContent='تم استقبال معرف الجهاز ('+(r.source==='profile-signature-untrusted'?'من استجابة ملف التعريف — توقيع الجهاز لم يُوثَّق بسلسلة Apple':'بإدخال يدوي غير موثق')+
+   '). الطراز: '+(r.productCode||r.deviceName||'غير متاح')+'، رقم النظام: '+(r.iosBuild||'غير متاح')+'.';
+ }else{$('state').textContent='لم يصل معرّف الجهاز بعد. أكمل خطوات ملف التعريف ثم ارجع لهذه الصفحة.';}
+ }catch(e){$('state').textContent=e.message;}
+}
+$('check').addEventListener('click',check);
+$('sendManual').addEventListener('click',async()=>{
+ if(!order)return;
+ try{await request('/api/certificates/orders/'+order.id+'/udid',{method:'POST',
+ headers:{'Content-Type':'application/json',Authorization:'Bearer '+order.token},
+ body:JSON.stringify({udid:$('manual').value.trim()})});await check();}
+ catch(e){$('state').textContent=e.message;}
+});
+if(order)check();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)check()});
+</script></body></html>

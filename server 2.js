@@ -15,6 +15,7 @@ const BUNDLED_PUBLIC = {"/index.html":"H4sIAAAAAAAC/819aZMbx5Xgd/6KIigRgAVU4z6J5
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'));
 const CATALOG = path.join(DATA_DIR, 'catalog.json');
 const AUTH = path.join(DATA_DIR, 'auth.json');
+const certificateOrders=require('./certificate-orders').build({dataDir:DATA_DIR,getSession:session});
 const sessions = new Map();
 const attempts = new Map();
 const TTL_MS = 1000 * 60 * 60 * 24 * 7;
@@ -150,6 +151,7 @@ async function api(req,res,pathname){
     sessions.set(crypto.createHash('sha256').update(token).digest('hex'),{expires:Date.now()+TTL_MS});
     return response(res,200,{ok:true},{'Set-Cookie':secureCookie(token)});
   }
+  if(pathname.startsWith('/api/certificates/')||pathname.startsWith('/api/admin/certificates/'))return certificateOrders.handle(req,res,pathname);
   const current=session(req);
   if(!current)return error(res,401,'يلزم تسجيل دخول المدير');
   if(pathname==='/api/admin/data'&&req.method==='GET')return response(res,200,catalog);
@@ -181,6 +183,13 @@ function serveStatic(req,res,pathname){
   try {requested=decodeURIComponent(pathname);}catch{res.writeHead(400);return res.end();}
   const adminRoute=requested==='/admin' || requested==='/admin/';
   const urlPath=requested==='/'||adminRoute?'/index.html':requested;
+  if(pathname==='/certificates'||pathname==='/certificates/'||pathname==='/certificates-admin'||pathname==='/certificates-admin/'){
+    const name=pathname.startsWith('/certificates-admin')?'certificates-admin.html':'certificates.html';
+    const file=path.join(__dirname,'public',name);
+    const data=fs.readFileSync(file);
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex','Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"});
+    return req.method==='HEAD'?res.end():res.end(data);
+  }
   if(!Object.prototype.hasOwnProperty.call(BUNDLED_PUBLIC,urlPath)){
     res.writeHead(404);return res.end('Not found');
   }
