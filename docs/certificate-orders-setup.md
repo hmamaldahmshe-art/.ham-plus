@@ -37,6 +37,20 @@ Never include API keys in these requests or browser source.
 
 **Caution:** Changing Render environment settings may trigger a redeploy and restart of the live `main` service. The existing administrator password and session management currently use ephemeral local/in-memory state; arrange durable authentication before any production restart and do not change live settings until approved.
 
+## Experimental automatic UDID extraction — staging ONLY
+
+- Staging URL: https://ham-plus-udid-staging.onrender.com/certificates, opened **in Safari on the iPhone being registered**.
+- Visitor taps the trial button and explicitly consents; no device details are obtained merely from visiting the webpage.
+- A dedicated, tightly scoped HttpOnly browser cookie authorizes a time-limited Apple Profile Service `.mobileconfig` download.
+- Only `UDID`, `PRODUCT`, and `VERSION` are requested. Apple may return a model code, not the human-defined device nickname.
+- Modern iOS compatibility and the finishing profile handshake are **not yet confirmed on an actual device**. The profile is currently unsigned and can show an untrusted/unsigned warning.
+- A CMS signature and per-order challenge are checked for integrity and one-time correlation, but **the Apple device signer certificate chain is not yet authenticated**. Any result is marked `profile-signature-untrusted` and must not be used to automatically issue/sell signing credentials.
+- No MDM enrollment, device restrictions, SCEP or signing assets are installed/provisioned by this prototype.
+- The Apple reference documentation describes an older multi-phase enrollment workflow. This minimal response may leave the user with an iOS profile installation error, even if the callback submitted device attributes successfully.
+
+Staging-only environment values: `HAM_PROFILE_TEST_ENABLED=true` and `HAM_PUBLIC_ORIGIN=https://ham-plus-udid-staging.onrender.com`. Do not set this test flag on the production service.
+To finish a test, review the visible request, check whether the device details reached the admin dashboard, and delete the test order. Remove any downloaded profile if it remains installed.
+
 ## 4. Checks required before production
 
 1. Confirm migrations are applied and RLS/grants work (anon should not see orders).
