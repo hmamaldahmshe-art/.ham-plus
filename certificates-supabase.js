@@ -36,6 +36,10 @@ function buildStore({transport=fetch}={}){
     try{return await res.json();}catch{throw new Error('Unexpected database response');}
   }
   return {
+    async health(){
+      await call('select=id&limit=0');
+      return true;
+    },
     async list(){
       const rows=await call('select='+fields+'&order=created_at.desc&limit=500');
       return rows.map(normalize);
