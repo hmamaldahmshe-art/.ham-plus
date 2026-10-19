@@ -25,7 +25,7 @@ jobs:
                   console.log('PASS: staging app successfully queried Supabase; no order was created.');
                   return;
                 }
-                console.error('Unexpected staging status:',response.status);
+                console.error('Unexpected staging status:',response.status,'reason:', ['قاعدة بيانات الطلبات غير مرتبطة بعد','خدمة الطلبات غير متاحة مؤقتًا','الطلب غير موجود'].includes(data?.error)?data.error:'unrecognized');
               }catch(e){console.error('Staging request failed:',e.name);}
               if(attempt<3)await pause(6000);
             }
