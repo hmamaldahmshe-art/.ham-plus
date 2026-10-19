@@ -3,7 +3,7 @@
 const TABLE='ham_certificate_orders';
 function config(){
   const raw=process.env.SUPABASE_URL||'';
-  const key=process.env.SUPABASE_SERVICE_ROLE_KEY||'';
+  const key=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||'';
   let base;
   try{base=new URL(raw);}catch{return null;}
   if(base.protocol!=='https:'||!base.hostname.endsWith('.supabase.co')||base.pathname!=='/'||!key)return null;
@@ -23,8 +23,9 @@ function buildStore({transport=fetch}={}){
   async function call(query='',options={}){
     const url=new URL(endpoint);
     if(query)url.search=query;
-    const headers={apikey:setup.key,Authorization:'Bearer '+setup.key,
+    const headers={apikey:setup.key,
       'Content-Type':'application/json',Accept:'application/json',Prefer:'return=representation'};
+    if(!setup.key.startsWith('sb_secret_'))headers.Authorization='Bearer '+setup.key;
     let res;
     try{res=await transport(url,{method:options.method||'GET',headers,
       body:options.body?JSON.stringify(options.body):undefined,
